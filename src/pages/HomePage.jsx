@@ -208,11 +208,7 @@ function HomePage() {
                 </div>
 
                 {/* Teachers */}
-                <section className="relative rounded-3xl overflow-hidden">
-                    {/* Subtle gradient background */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-white via-indigo-50/30 to-violet-50/30 dark:from-slate-900 dark:via-indigo-950/20 dark:to-violet-950/20" />
-                    <div className="absolute inset-0 border border-slate-200/80 dark:border-slate-700/50 rounded-3xl" />
-                    
+                <section className="relative">
                     <div className="relative max-w-7xl mx-auto px-6 py-14">
                         <div className="text-center mb-12">
                             <span className="inline-block text-xs font-semibold tracking-widest uppercase text-indigo-600 dark:text-indigo-400 mb-3">
