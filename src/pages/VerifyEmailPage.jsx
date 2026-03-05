@@ -53,7 +53,7 @@ function VerifyEmailPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-indigo-50 dark:bg-slate-950 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 p-8">
           <div className="text-center mb-8">

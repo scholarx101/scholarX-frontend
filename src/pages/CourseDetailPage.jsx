@@ -44,7 +44,7 @@ function CourseDetailPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+            <div className="min-h-screen flex items-center justify-center bg-indigo-50 dark:bg-slate-950">
                 <div className="text-center">
                     <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-indigo-500 border-t-transparent"></div>
                     <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading course details...</p>
@@ -55,7 +55,7 @@ function CourseDetailPage() {
 
     if (error) {
         return (
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center px-4">
                 <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center">
                     <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
                         <svg className="w-6 h-6 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -77,7 +77,7 @@ function CourseDetailPage() {
 
     if (!course) {
         return (
-            <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center px-4">
                 <div className="max-w-md w-full bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-8 text-center">
                     <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center">
                         <svg className="w-6 h-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
@@ -98,9 +98,9 @@ function CourseDetailPage() {
     }
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+        <div className="min-h-screen bg-indigo-50 dark:bg-slate-950">
             {/* Hero */}
-            <div className="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden">
+            <div className="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 overflow-hidden -mt-16">
                 <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-500/10 via-transparent to-transparent" />
                 <div className="relative max-w-6xl mx-auto px-4 sm:px-6 py-10 md:py-16">
                     <button

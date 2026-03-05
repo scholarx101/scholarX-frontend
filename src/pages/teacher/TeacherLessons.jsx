@@ -27,7 +27,7 @@ export default function TeacherLessons() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-indigo-600 border-t-transparent" />
       </div>
     );
@@ -35,7 +35,7 @@ export default function TeacherLessons() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center px-4">
+      <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center px-4">
         <div className="max-w-md w-full bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-8 text-center">
           <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
             <svg className="w-6 h-6 text-red-600 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
@@ -53,9 +53,9 @@ export default function TeacherLessons() {
   const { course, lessons = [] } = data || {};
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-indigo-50 dark:bg-slate-950">
       {/* Dark gradient header */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white">
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 text-white -mt-16">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
           <Link to="/teacher/dashboard" className="inline-flex items-center gap-1.5 text-sm text-slate-300 hover:text-white transition mb-4">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>

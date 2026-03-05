@@ -74,7 +74,7 @@ export default function StudentDashboard() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="text-center">
           <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-indigo-500 border-t-transparent"></div>
           <p className="mt-4 text-sm text-slate-500 dark:text-slate-400">Loading your enrollments...</p>
@@ -84,9 +84,9 @@ export default function StudentDashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-indigo-50 dark:bg-slate-950">
       {/* Header */}
-      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+      <div className="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 -mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10">
           <h1 className="text-3xl font-bold text-white mb-1">My Courses</h1>
           <p className="text-slate-400 text-sm">Track your learning progress</p>

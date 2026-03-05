@@ -57,9 +57,10 @@ function HomePage() {
     );
 
     return (
-        <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
+        <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex flex-col">
             {/* Hero Section */}
-            <section className="relative overflow-hidden bg-slate-950">
+            {/* pull up behind sticky navbar */}
+            <section className="relative overflow-hidden bg-slate-950 -mt-16">
                 {/* Gradient background */}
                 <div className="absolute inset-0">
                     <div className="absolute inset-0 bg-gradient-to-br from-indigo-950 via-slate-950 to-violet-950" />

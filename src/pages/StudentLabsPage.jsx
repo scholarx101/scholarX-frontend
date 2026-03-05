@@ -55,16 +55,16 @@ export default function StudentLabsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-indigo-50 dark:bg-slate-950 flex items-center justify-center">
         <div className="animate-spin rounded-full h-10 w-10 border-2 border-violet-600 border-t-transparent" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+    <div className="min-h-screen bg-indigo-50 dark:bg-slate-950">
       {/* Dark gradient header */}
-      <div className="bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 text-white">
+      <div className="bg-gradient-to-br from-slate-900 via-violet-950 to-slate-900 text-white -mt-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           <button
             onClick={() => navigate("/student/dashboard")}

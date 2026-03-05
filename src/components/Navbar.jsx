@@ -91,8 +91,8 @@ function Navbar() {
       onClick={toggleTheme}
       aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
       className="inline-flex items-center justify-center rounded-full w-9 h-9 
-                 text-slate-400 hover:text-white transition-colors duration-200
-                 hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50"
+                 text-slate-500 dark:text-slate-300 hover:text-slate-700 dark:hover:text-white transition-colors duration-200
+                 hover:bg-slate-200/50 dark:hover:bg-white/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50"
     >
       {theme === "dark" ? (
         <svg viewBox="0 0 24 24" className="h-[18px] w-[18px]" fill="none" aria-hidden="true">
@@ -110,10 +110,10 @@ function Navbar() {
   return (
     <header
       className={
-        "sticky top-0 z-50 transition-all duration-300 " +
+        "sticky top-0 z-50 border-b transition-all duration-300 " +
         (scrolled
-          ? "bg-slate-950/95 backdrop-blur-xl shadow-lg shadow-black/10"
-          : "bg-slate-950/90 backdrop-blur-md")
+          ? "bg-slate-950/75 backdrop-blur-xl border-slate-800/40 shadow-lg shadow-black/20"
+          : "bg-slate-950/70 backdrop-blur-lg border-slate-800/30")
       }
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -157,10 +157,11 @@ function Navbar() {
                 type="button"
                 onClick={cta.onClick}
                 className="inline-flex items-center gap-1.5 px-5 py-2 text-[13px] font-semibold 
-                           text-white rounded-full border border-indigo-400/50
-                           bg-gradient-to-r from-indigo-500/10 to-violet-500/10
-                           hover:from-indigo-500/25 hover:to-violet-500/25
-                           hover:border-indigo-400/80 hover:shadow-lg hover:shadow-indigo-500/10
+                           text-white rounded-full border border-indigo-500/60
+                           bg-gradient-to-r from-indigo-600 to-violet-600
+                           hover:from-indigo-700 hover:to-violet-700
+                           hover:border-indigo-500 hover:shadow-lg hover:shadow-indigo-500/20
+                           dark:hover:shadow-indigo-500/30
                            transition-all duration-300"
               >
                 {cta.label}
@@ -177,7 +178,7 @@ function Navbar() {
             type="button"
             onClick={() => setMobileOpen((v) => !v)}
             className="md:hidden inline-flex items-center justify-center rounded-lg p-2 
-                       text-slate-300 hover:text-white hover:bg-white/10 
+                       text-slate-300 hover:text-white hover:bg-white/10
                        transition focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-400/50"
             aria-label={mobileOpen ? "Close menu" : "Open menu"}
             aria-expanded={mobileOpen}
@@ -201,14 +202,15 @@ function Navbar() {
             (mobileOpen ? "max-h-96 opacity-100 pb-4" : "max-h-0 opacity-0")
           }
         >
-          <div className="rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-700/50 p-3 space-y-1">
+          <div className="rounded-2xl bg-slate-900/80 backdrop-blur-xl border border-slate-800/50 p-3 space-y-1">
             {links.map((item) => (
               <button
                 key={item.key}
                 type="button"
                 onClick={item.onClick}
                 className="w-full text-left px-4 py-2.5 rounded-xl text-sm font-medium 
-                           text-slate-300 hover:text-white hover:bg-white/5 transition-colors"
+                           text-slate-300 hover:text-white 
+                           hover:bg-white/5 transition-colors"
               >
                 {item.label}
               </button>
@@ -220,7 +222,7 @@ function Navbar() {
                 className="w-full mt-2 inline-flex items-center justify-center gap-1.5 px-5 py-2.5 
                            text-sm font-semibold text-white rounded-xl
                            bg-gradient-to-r from-indigo-600 to-violet-600
-                           hover:from-indigo-500 hover:to-violet-500 transition-all"
+                           hover:from-indigo-700 hover:to-violet-700 transition-all"
               >
                 {cta.label}
                 <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

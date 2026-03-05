@@ -118,15 +118,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12">
+    <div className="min-h-screen flex items-center justify-center bg-indigo-50 dark:bg-slate-950 px-4 py-12">
       <div className="w-full max-w-md">
         {/* Card */}
         <div className="bg-white dark:bg-slate-900/80 rounded-2xl border border-slate-200/80 dark:border-slate-800 shadow-xl shadow-slate-200/50 dark:shadow-slate-950/50 p-8">
           {/* Header */}
           <div className="text-center mb-8">
-            <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-gradient-to-br from-indigo-600 to-violet-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-              <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" /></svg>
-            </div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Welcome back</h1>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">Sign in to your account</p>
           </div>
