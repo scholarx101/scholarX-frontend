@@ -22,9 +22,9 @@ const ChangePasswordPage = lazy(() => import("./pages/ChangePasswordPage"));
 const BecomeMentorPage = lazy(() => import("./pages/BecomeMentorPage"));
 // const MyCoursesPage = lazy(() => import("./pages/MyCoursePage"));
 const CourseDetailPage = lazy(() => import("./pages/CourseDetailPage"));
-// const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
-// const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
-// const PaymentCancelledPage = lazy(() => import("./pages/PaymentCancelledPage"));
+const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage"));
+const PaymentFailedPage = lazy(() => import("./pages/PaymentFailedPage"));
+const PaymentCancelledPage = lazy(() => import("./pages/PaymentCancelledPage"));
 const AdminDashboard = lazy(() => import("./pages/admin/AdminDashboard"));
 const AdminCoursesPage = lazy(() => import("./pages/admin/AdminCoursesPage"));
 const AdminCourseForm = lazy(() => import("./pages/admin/AdminCourseForm"));
@@ -63,9 +63,9 @@ export default function App() {
                 <Route path="/verify-email" element={<VerifyEmailPage />} />
                 <Route path="/become-mentor" element={<BecomeMentorPage />} />
                 <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
-                {/* <Route path="/payment/success" element={<PaymentSuccessPage />} />
+                <Route path="/payment/success" element={<PaymentSuccessPage />} />
                 <Route path="/payment/fail" element={<PaymentFailedPage />} />
-                <Route path="/payment/cancel" element={<PaymentCancelledPage />} /> */}
+                <Route path="/payment/cancel" element={<PaymentCancelledPage />} />
 
                 {/* student dashboard */}
                 <Route

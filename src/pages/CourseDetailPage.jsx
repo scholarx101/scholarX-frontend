@@ -1,14 +1,22 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import { getCourseById } from "../api/courses";
-import { resolveAssetUrl } from "../utils/coursePricingUtils";
+import { resolveAssetUrl, formatMoney } from "../utils/coursePricingUtils";
+import { initCoursePayment } from "../api/payments";
 
 function CourseDetailPage() {
     const { id } = useParams();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [course, setCourse] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
+    // payment
+    const [selectedPlan, setSelectedPlan] = useState("combo");
+    const [unitsCount, setUnitsCount] = useState(1);
+    const [initiating, setInitiating] = useState(false);
+    const [payError, setPayError] = useState("");
 
     useEffect(() => {
         let isMounted = true;
@@ -41,6 +49,32 @@ function CourseDetailPage() {
             isMounted = false;
         };
     }, [id]);
+
+    // default to first available plan once course loads
+    useEffect(() => {
+        if (!course) return;
+        if (course.comboFee != null) setSelectedPlan("combo");
+        else if (course.monthlyFee != null) setSelectedPlan("monthly");
+        else if (course.semesterFee != null) setSelectedPlan("semester");
+    }, [course]);
+
+    async function handleEnroll() {
+        if (!user) { navigate("/login"); return; }
+        try {
+            setInitiating(true);
+            setPayError("");
+            const payload = { courseId: id, paymentPlan: selectedPlan };
+            if (selectedPlan === "monthly" || selectedPlan === "semester") {
+                payload.unitsCount = unitsCount;
+            }
+            const result = await initCoursePayment(payload);
+            // hand off to SSLCommerz
+            window.location.href = result.gatewayUrl;
+        } catch (err) {
+            setPayError(err.message || "Failed to initiate payment. Please try again.");
+            setInitiating(false);
+        }
+    }
 
     if (loading) {
         return (
@@ -172,35 +206,153 @@ function CourseDetailPage() {
                                 )}
                             </div>
 
-                            {/* Price */}
-                            <div className="flex items-baseline gap-2 pt-2">
-                                <span className="text-3xl font-bold text-white">
-                                    {course.pricing?.current_price != null
-                                        ? `$${course.pricing.current_price}`
-                                        : course.price > 0
-                                        ? `${course.price} BDT`
-                                        : "Free"}
-                                </span>
-                                {course.pricing?.original_price && (
-                                    <span className="text-lg text-slate-500 line-through">
-                                        ${course.pricing.original_price}
-                                    </span>
+                            {/* Payment plan selector */}
+                            <div className="pt-3 space-y-3">
+                                {payError && (
+                                    <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">
+                                        {payError}
+                                    </p>
                                 )}
-                            </div>
 
-                            <button
-                                onClick={() => navigate("/student/dashboard")}
-                                className="inline-flex items-center gap-2 px-8 py-3 text-sm font-semibold text-white rounded-xl
-                                           bg-gradient-to-r from-indigo-600 to-violet-600
-                                           hover:from-indigo-500 hover:to-violet-500
-                                           shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40
-                                           transition-all duration-200"
-                            >
-                                Enroll Now
-                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                                </svg>
-                            </button>
+                                {/* Plan options */}
+                                <div className="space-y-2">
+                                    {course.comboFee != null && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setSelectedPlan("combo")}
+                                            className={`w-full flex items-center justify-between px-4 py-3 rounded-xl border text-left transition ${
+                                                selectedPlan === "combo"
+                                                    ? "border-indigo-400/60 bg-indigo-600/20 ring-1 ring-indigo-500/40"
+                                                    : "border-slate-700 hover:border-slate-600"
+                                            }`}
+                                        >
+                                            <div>
+                                                <p className="text-sm font-semibold text-white">Full Access</p>
+                                                <p className="text-xs text-slate-400 mt-0.5">One-time · All content unlocked</p>
+                                            </div>
+                                            <span className="text-sm font-bold text-indigo-300 ml-4 whitespace-nowrap">
+                                                {formatMoney(course.comboFee, course.currency || "BDT")}
+                                            </span>
+                                        </button>
+                                    )}
+
+                                    {course.monthlyFee != null && (
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedPlan("monthly")}
+                                                className={`w-full flex items-center justify-between px-4 py-3 border text-left transition ${
+                                                    selectedPlan === "monthly"
+                                                        ? "rounded-t-xl border-indigo-400/60 border-b-0 bg-indigo-600/20 ring-1 ring-indigo-500/40 ring-b-0"
+                                                        : "rounded-xl border-slate-700 hover:border-slate-600"
+                                                }`}
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-semibold text-white">Monthly</p>
+                                                    <p className="text-xs text-slate-400 mt-0.5">Pay per month · unlock content as you go</p>
+                                                </div>
+                                                <span className="text-sm font-bold text-indigo-300 ml-4 whitespace-nowrap">
+                                                    {formatMoney(course.monthlyFee, course.currency || "BDT")}/mo
+                                                </span>
+                                            </button>
+                                            {selectedPlan === "monthly" && (
+                                                <div className="flex items-center gap-2 px-4 py-3 border border-t-0 border-indigo-400/60 rounded-b-xl bg-indigo-600/10">
+                                                    <span className="text-xs text-slate-400 mr-1">Months:</span>
+                                                    {[1, 2, 3, 4].map((n) => (
+                                                        <button
+                                                            key={n}
+                                                            type="button"
+                                                            onClick={() => setUnitsCount(n)}
+                                                            className={`w-8 h-8 rounded-lg text-sm font-semibold transition ${
+                                                                unitsCount === n
+                                                                    ? "bg-indigo-600 text-white"
+                                                                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                                            }`}
+                                                        >
+                                                            {n}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+
+                                    {course.semesterFee != null && (
+                                        <div>
+                                            <button
+                                                type="button"
+                                                onClick={() => setSelectedPlan("semester")}
+                                                className={`w-full flex items-center justify-between px-4 py-3 border text-left transition ${
+                                                    selectedPlan === "semester"
+                                                        ? "rounded-t-xl border-indigo-400/60 border-b-0 bg-indigo-600/20 ring-1 ring-indigo-500/40"
+                                                        : "rounded-xl border-slate-700 hover:border-slate-600"
+                                                }`}
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-semibold text-white">Semester</p>
+                                                    <p className="text-xs text-slate-400 mt-0.5">Pay per semester · best value over 6 months</p>
+                                                </div>
+                                                <span className="text-sm font-bold text-indigo-300 ml-4 whitespace-nowrap">
+                                                    {formatMoney(course.semesterFee, course.currency || "BDT")}/sem
+                                                </span>
+                                            </button>
+                                            {selectedPlan === "semester" && (
+                                                <div className="flex items-center gap-2 px-4 py-3 border border-t-0 border-indigo-400/60 rounded-b-xl bg-indigo-600/10">
+                                                    <span className="text-xs text-slate-400 mr-1">Semesters:</span>
+                                                    {[1, 2].map((n) => (
+                                                        <button
+                                                            key={n}
+                                                            type="button"
+                                                            onClick={() => setUnitsCount(n)}
+                                                            className={`w-8 h-8 rounded-lg text-sm font-semibold transition ${
+                                                                unitsCount === n
+                                                                    ? "bg-indigo-600 text-white"
+                                                                    : "bg-slate-700 text-slate-300 hover:bg-slate-600"
+                                                            }`}
+                                                        >
+                                                            {n}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Admission fee notice */}
+                                {course.admissionFee > 0 && (
+                                    <p className="text-xs text-slate-500">
+                                        * Admission fee of {formatMoney(course.admissionFee, course.currency || "BDT")} is included in your first payment.
+                                    </p>
+                                )}
+
+                                {/* Proceed button */}
+                                <button
+                                    onClick={handleEnroll}
+                                    disabled={initiating}
+                                    className="w-full inline-flex items-center justify-center gap-2 px-8 py-3 text-sm font-semibold text-white rounded-xl
+                                               bg-gradient-to-r from-indigo-600 to-violet-600
+                                               hover:from-indigo-500 hover:to-violet-500
+                                               shadow-lg shadow-indigo-500/25 hover:shadow-indigo-500/40
+                                               transition-all duration-200 disabled:opacity-60"
+                                >
+                                    {initiating ? (
+                                        <>
+                                            <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                            Redirecting to payment…
+                                        </>
+                                    ) : !user ? (
+                                        "Login to Enroll"
+                                    ) : (
+                                        <>
+                                            Proceed to Payment
+                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                            </svg>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -245,13 +397,23 @@ function CourseDetailPage() {
                         Enroll in this course today and unlock all the content and lessons.
                     </p>
                     <button
-                        onClick={() => navigate("/student/dashboard")}
-                        className="inline-flex items-center gap-2 px-8 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg shadow-black/10"
+                        onClick={handleEnroll}
+                        disabled={initiating}
+                        className="inline-flex items-center gap-2 px-8 py-3 bg-white text-indigo-600 font-semibold rounded-xl hover:bg-indigo-50 transition-colors shadow-lg shadow-black/10 disabled:opacity-60"
                     >
-                        Enroll Now
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                        </svg>
+                        {initiating ? (
+                            <>
+                                <span className="inline-block w-4 h-4 border-2 border-indigo-600/30 border-t-indigo-600 rounded-full animate-spin" />
+                                Redirecting…
+                            </>
+                        ) : (
+                            <>
+                                Enroll Now
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                                </svg>
+                            </>
+                        )}
                     </button>
                 </section>
             </div>

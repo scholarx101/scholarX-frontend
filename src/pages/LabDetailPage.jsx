@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { getLabById } from "../api/labs";
 import { subscribeToLab, getMyLabSubscriptions } from "../api/labSubscriptions";
+import { initLabPayment } from "../api/payments";
 import { resolveAssetUrl, formatMoney } from "../utils/coursePricingUtils";
 
 export default function LabDetailPage() {
@@ -54,6 +55,13 @@ export default function LabDetailPage() {
     try {
       setSubscribing(true);
       setError("");
+      if (lab.monthlyFee > 0) {
+        // Paid lab — redirect to SSLCommerz
+        const result = await initLabPayment({ labId: id });
+        window.location.href = result.gatewayUrl;
+        return; // navigation away; don't reset subscribing
+      }
+      // Free lab — direct subscription
       const sub = await subscribeToLab(id);
       setMySubscription(sub);
       setSuccessMsg("Subscription request submitted! Please wait for admin approval.");
@@ -215,7 +223,21 @@ export default function LabDetailPage() {
                                shadow-lg shadow-violet-500/25
                                transition-all duration-200 disabled:opacity-50"
                   >
-                    {subscribing ? "Subscribing..." : "Subscribe to Lab"}
+                    {subscribing ? (
+                      <>
+                        <span className="inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        {lab.monthlyFee > 0 ? "Redirecting to payment…" : "Subscribing…"}
+                      </>
+                    ) : lab.monthlyFee > 0 ? (
+                      <>
+                        Subscribe &amp; Pay {formatMoney(lab.monthlyFee, lab.currency || "BDT")}/mo
+                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                        </svg>
+                      </>
+                    ) : (
+                      "Subscribe to Lab"
+                    )}
                   </button>
                 )}
 
