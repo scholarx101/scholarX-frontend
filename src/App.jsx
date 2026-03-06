@@ -37,6 +37,14 @@ const AdminLabSubscribersPage = lazy(() => import("./pages/admin/AdminLabSubscri
 const LabDetailPage = lazy(() => import("./pages/LabDetailPage"));
 const StudentLabsPage = lazy(() => import("./pages/StudentLabsPage"));
 const TeacherLabsPage = lazy(() => import("./pages/teacher/TeacherLabsPage"));
+const AIToolsPage = lazy(() => import("./pages/AIToolsPage"));
+const ChatPage = lazy(() => import("./pages/ai-tools/ChatPage"));
+const AnalyzeDocumentPage = lazy(() => import("./pages/ai-tools/AnalyzeDocumentPage"));
+const ExplainCodePage = lazy(() => import("./pages/ai-tools/ExplainCodePage"));
+const GenerateIdeasPage = lazy(() => import("./pages/ai-tools/GenerateIdeasPage"));
+const TutorPage = lazy(() => import("./pages/ai-tools/TutorPage"));
+const ReviewTextPage = lazy(() => import("./pages/ai-tools/ReviewTextPage"));
+const ConversationsPage = lazy(() => import("./pages/ai-tools/ConversationsPage"));
 
 export default function App() {
     const [infoPanel, setInfoPanel] = useState(null);
@@ -124,6 +132,18 @@ export default function App() {
 
                 {/* public lab details */}
                 <Route path="/labs/:id" element={<LabDetailPage />} />
+
+                {/* public AI tools showcase */}
+                <Route path="/ai-tools" element={<AIToolsPage />} />
+
+                {/* protected AI tool pages */}
+                <Route path="/ai-tools/chat" element={<ProtectedRoute><ChatPage /></ProtectedRoute>} />
+                <Route path="/ai-tools/analyze-document" element={<ProtectedRoute><AnalyzeDocumentPage /></ProtectedRoute>} />
+                <Route path="/ai-tools/explain-code" element={<ProtectedRoute><ExplainCodePage /></ProtectedRoute>} />
+                <Route path="/ai-tools/generate-ideas" element={<ProtectedRoute><GenerateIdeasPage /></ProtectedRoute>} />
+                <Route path="/ai-tools/tutor" element={<ProtectedRoute><TutorPage /></ProtectedRoute>} />
+                <Route path="/ai-tools/review-text" element={<ProtectedRoute><ReviewTextPage /></ProtectedRoute>} />
+                <Route path="/ai-tools/conversations" element={<ProtectedRoute><ConversationsPage /></ProtectedRoute>} />
 
                 {/* admin-only area */}
                 <Route element={<AdminRoute />}>

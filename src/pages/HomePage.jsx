@@ -133,6 +133,19 @@ function HomePage() {
                                 </svg>
                                 Virtual Labs
                             </button>
+                            <button
+                                type="button"
+                                onClick={() => document.getElementById("ai-tools-section")?.scrollIntoView({ behavior: "smooth" })}
+                                className="inline-flex items-center gap-2 px-7 py-3.5 text-sm font-semibold 
+                                           text-slate-300 rounded-full border border-slate-600/50
+                                           hover:bg-white/5 hover:border-slate-500/80 hover:text-white
+                                           transition-all duration-300"
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.455 2.456L21.75 6l-1.036.259a3.375 3.375 0 00-2.455 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z" />
+                                </svg>
+                                AI Tools
+                            </button>
                         </div>
 
                         {/* Stats */}
@@ -205,6 +218,64 @@ function HomePage() {
                         onViewDetails={handleViewLabDetails}
                         actionLabel="View Lab"
                     />
+                </div>
+
+                {/* AI Tools */}
+                <div id="ai-tools-section">
+                    <section className="relative">
+                        <div className="relative w-full px-4 sm:px-6 py-12">
+                            <div className="text-center mb-8">
+                                <span className="inline-block text-xs font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400 mb-2">
+                                    AI-Powered
+                                </span>
+                                <h3 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-slate-50 mb-2">
+                                    Research Tools
+                                </h3>
+                                <p className="text-base text-slate-500 dark:text-slate-400 max-w-xl mx-auto">
+                                    Supercharge your research with AI chat, document analysis, code explanation, tutoring, and more.
+                                </p>
+                            </div>
+
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {[
+                                    { title: "AI Chat", desc: "Interactive conversations with AI", icon: "💬", gradient: "from-blue-500 to-cyan-500" },
+                                    { title: "Document Analyzer", desc: "AI-powered document analysis", icon: "📄", gradient: "from-emerald-500 to-teal-500" },
+                                    { title: "Code Explainer", desc: "Understand any code snippet", icon: "💻", gradient: "from-violet-500 to-purple-500" },
+                                    { title: "Research Ideas", desc: "Generate creative ideas", icon: "💡", gradient: "from-amber-500 to-orange-500" },
+                                    { title: "AI Tutor", desc: "Personalized learning", icon: "🎓", gradient: "from-rose-500 to-pink-500" },
+                                    { title: "Text Reviewer", desc: "Comprehensive writing feedback", icon: "📋", gradient: "from-indigo-500 to-blue-500" },
+                                ].map((tool) => (
+                                    <div
+                                        key={tool.title}
+                                        className="rounded-2xl bg-white dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/50
+                                                   p-5 flex items-center gap-4 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                                    >
+                                        <span className="text-2xl">{tool.icon}</span>
+                                        <div>
+                                            <h4 className="text-sm font-bold text-slate-900 dark:text-slate-50">{tool.title}</h4>
+                                            <p className="text-xs text-slate-500 dark:text-slate-400">{tool.desc}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="text-center mt-8">
+                                <button
+                                    onClick={() => navigate("/ai-tools")}
+                                    className="inline-flex items-center gap-2 px-6 py-3 text-sm font-semibold text-white 
+                                               rounded-full bg-gradient-to-r from-cyan-600 to-indigo-600
+                                               hover:from-cyan-500 hover:to-indigo-500
+                                               shadow-lg shadow-cyan-500/25 hover:shadow-cyan-500/40
+                                               transition-all duration-300 hover:-translate-y-0.5"
+                                >
+                                    Explore All AI Tools
+                                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </section>
                 </div>
 
                 {/* Teachers */}
