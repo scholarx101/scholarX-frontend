@@ -22,8 +22,8 @@ export const resolveAssetUrl = (url) => {
     if (typeof url !== "string" || !url) return "";
     // if it's already absolute, just return it
     if (/^https?:\/\//i.test(url)) return url;
-    // otherwise prefix with API base so that relative paths from backend resolve correctly
-    const base = import.meta.env.VITE_API_BASE_URL || "";
+    // otherwise prefix with API base or origin so that relative paths resolve to a usable host
+    const base = import.meta.env.VITE_API_BASE_URL || window.location.origin;
     // ensure no double slashes when concatenating
     const prefix = base.replace(/\/+$/, "");
     const path = url.startsWith("/") ? url : `/${url}`;

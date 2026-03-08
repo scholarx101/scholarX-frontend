@@ -123,9 +123,9 @@ export default function LabDetailPage() {
             {/* Thumbnail */}
             <div className="md:col-span-2">
               <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/30 aspect-video bg-slate-800">
-                {lab.thumbnailUrl ? (
+                {(lab.thumbnail || lab.thumbnailUrl) ? (
                   <img
-                    src={resolveAssetUrl(lab.thumbnailUrl)}
+                    src={resolveAssetUrl(lab.thumbnail || lab.thumbnailUrl)}
                     alt={lab.name}
                     className="w-full h-full object-cover"
                   />

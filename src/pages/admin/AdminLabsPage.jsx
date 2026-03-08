@@ -88,9 +88,9 @@ export default function AdminLabsPage() {
               >
                 {/* Thumbnail */}
                 <div className="w-full md:w-32 h-24 rounded-lg overflow-hidden bg-violet-50 dark:bg-violet-900/20 flex-shrink-0">
-                  {lab.thumbnailUrl ? (
+                  {(lab.thumbnail || lab.thumbnailUrl) ? (
                     <img
-                      src={resolveAssetUrl(lab.thumbnailUrl)}
+                      src={resolveAssetUrl(lab.thumbnail || lab.thumbnailUrl)}
                       alt={lab.name}
                       className="w-full h-full object-cover"
                     />

@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { getAllTeachers, updateTeacher, uploadTeacherPhoto } from "../../api/teachers";
 import { getAllApplications, approveApplication, updateApplication } from "../../api/teacherApplications";
 import FileUpload from "../../components/FileUpload";
+import { resolveAssetUrl } from "../../utils/coursePricingUtils";
 
 export default function AdminTeachersPage() {
   const [activeTab, setActiveTab] = useState("applications"); // "applications" or "teachers"
@@ -165,7 +166,7 @@ export default function AdminTeachersPage() {
                       <div className="flex gap-3 text-sm">
                         {app.photoUrl && (
                           <a
-                            href={app.photoUrl}
+                            href={resolveAssetUrl(app.photoUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-indigo-600 dark:text-indigo-400 hover:underline"
@@ -175,7 +176,7 @@ export default function AdminTeachersPage() {
                         )}
                         {app.cvUrl && (
                           <a
-                            href={app.cvUrl}
+                            href={resolveAssetUrl(app.cvUrl)}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-indigo-600 dark:text-indigo-400 hover:underline"
