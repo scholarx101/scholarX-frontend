@@ -160,6 +160,15 @@ export default function StudentLabsPage() {
                     >
                       View Lab
                     </button>
+                    {sub.status === "active" && (
+                      <button
+                        onClick={() => navigate(`/labs/${lab._id}#ai-tools`)}
+                        className="px-3.5 py-2 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white text-sm rounded-lg font-medium transition shadow-lg shadow-cyan-500/20"
+                        title="Access AI tools for this lab"
+                      >
+                        AI Tools
+                      </button>
+                    )}
                     {sub.status !== "cancelled" && (
                       <button
                         onClick={() => handleCancel(sub._id)}

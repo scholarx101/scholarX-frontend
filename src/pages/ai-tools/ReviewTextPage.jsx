@@ -1,5 +1,6 @@
 // src/pages/ai-tools/ReviewTextPage.jsx
 import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AIToolLayout from "../../components/AIToolLayout";
 import { reviewText } from "../../api/aiTools";
 
@@ -11,6 +12,9 @@ const REVIEW_TYPES = [
 ];
 
 export default function ReviewTextPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const labId = searchParams.get("labId");
   const [text, setText] = useState("");
   const [reviewType, setReviewType] = useState("academic");
   const [result, setResult] = useState("");
@@ -26,13 +30,27 @@ export default function ReviewTextPage() {
     setLoading(true);
 
     try {
-      const data = await reviewText({ text: text.trim(), reviewType });
+      const data = await reviewText({ text: text.trim(), reviewType, labId });
       setResult(data.response || data.review || "");
     } catch (err) {
       setError(err.message || "Review failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!labId) {
+    return (
+      <AIToolLayout title="Text Reviewer" subtitle="Get comprehensive feedback on your writing" gradient="from-indigo-500 to-blue-500">
+        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center">
+            <svg className="w-6 h-6 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">AI tools must be accessed through a subscribed lab.</p>
+          <button onClick={() => navigate("/student/labs")} className="px-5 py-2 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition">Go to My Labs</button>
+        </div>
+      </AIToolLayout>
+    );
   }
 
   return (

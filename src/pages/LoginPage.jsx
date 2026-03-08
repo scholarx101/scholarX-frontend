@@ -30,7 +30,6 @@ export default function LoginPage() {
     setLoading(true);
     try {
       await login(form);
-      console.log("Login successful, navigating to:", from);
       navigate(from, { replace: true });
     } catch (err) {
       // Check if the email is not registered

@@ -5,7 +5,17 @@ import { useAuth } from "../context/AuthContext";
 import { getLabById } from "../api/labs";
 import { subscribeToLab, getMyLabSubscriptions } from "../api/labSubscriptions";
 import { initLabPayment } from "../api/payments";
+import { getLabTools } from "../api/aiTools";
 import { resolveAssetUrl, formatMoney } from "../utils/coursePricingUtils";
+
+const TOOL_PATH_MAP = {
+  chat: { path: "/ai-tools/chat", label: "AI Chat Assistant", icon: "💬", color: "from-blue-500 to-cyan-500" },
+  document_analysis: { path: "/ai-tools/analyze-document", label: "Document Analyzer", icon: "📄", color: "from-emerald-500 to-teal-500" },
+  code_explanation: { path: "/ai-tools/explain-code", label: "Code Explainer", icon: "💻", color: "from-violet-500 to-purple-500" },
+  idea_generation: { path: "/ai-tools/generate-ideas", label: "Research Ideas", icon: "💡", color: "from-amber-500 to-orange-500" },
+  tutoring: { path: "/ai-tools/tutor", label: "AI Tutor", icon: "🎓", color: "from-rose-500 to-pink-500" },
+  text_review: { path: "/ai-tools/review-text", label: "Text Reviewer", icon: "📋", color: "from-indigo-500 to-blue-500" },
+};
 
 export default function LabDetailPage() {
   const { id } = useParams();
@@ -18,6 +28,7 @@ export default function LabDetailPage() {
   const [subscribing, setSubscribing] = useState(false);
   const [mySubscription, setMySubscription] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
+  const [labTools, setLabTools] = useState([]);
 
   useEffect(() => {
     async function load() {
@@ -37,6 +48,14 @@ export default function LabDetailPage() {
           } catch {
             // Not subscribed or no auth
           }
+        }
+
+        // Load lab AI tools (public endpoint)
+        try {
+          const tools = await getLabTools(id);
+          setLabTools(Array.isArray(tools) ? tools : []);
+        } catch {
+          // Tools not available or endpoint not yet live
         }
       } catch (err) {
         setError(err.message || "Failed to load lab details");
@@ -269,6 +288,78 @@ export default function LabDetailPage() {
                 {mod.name || mod.userId?.name || "Moderator"}
               </span>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* AI Research Tools */}
+      {labTools.length > 0 && (
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 border-t border-slate-200 dark:border-slate-800">
+          <div className="mb-6">
+            <span className="text-xs font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400">Lab Feature</span>
+            <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">AI Research Tools</h3>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+              {subscriptionStatus === "active" || user?.role === "admin"
+                ? "Click any enabled tool to start using it."
+                : "Subscribe to this lab to access the AI tools below."}
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {labTools.map((tool) => {
+              const meta = TOOL_PATH_MAP[tool.key] || {};
+              const canUse =
+                tool.enabled &&
+                (subscriptionStatus === "active" || user?.role === "admin");
+              const isDisabled = !tool.enabled;
+              const needsSub = tool.enabled && subscriptionStatus !== "active" && user?.role !== "admin";
+
+              return (
+                <div
+                  key={tool.key}
+                  onClick={() => {
+                    if (canUse) navigate(`${meta.path}?labId=${id}`);
+                  }}
+                  className={`relative rounded-2xl border p-5 flex items-start gap-4 transition-all duration-200
+                    ${canUse
+                      ? "bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                      : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 cursor-default opacity-70"
+                    }`}
+                >
+                  {/* Icon */}
+                  <span className="text-2xl shrink-0 mt-0.5">{meta.icon || "🔧"}</span>
+
+                  {/* Info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                        {meta.label || tool.key}
+                      </span>
+                      {isDisabled && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+                          Not enabled
+                        </span>
+                      )}
+                      {needsSub && !isDisabled && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+                          Subscribe to use
+                        </span>
+                      )}
+                      {canUse && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                          Available
+                        </span>
+                      )}
+                    </div>
+                    {canUse && (
+                      <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1 font-medium">Click to open →</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

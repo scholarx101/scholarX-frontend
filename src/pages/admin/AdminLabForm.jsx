@@ -11,6 +11,15 @@ import {
 } from "../../api/labs";
 import { getAllTeachers } from "../../api/teachers";
 
+const AI_TOOLS_LIST = [
+  { key: "chat", label: "AI Chat Assistant" },
+  { key: "document_analysis", label: "Document Analyzer" },
+  { key: "code_explanation", label: "Code Explainer" },
+  { key: "idea_generation", label: "Research Idea Generator" },
+  { key: "tutoring", label: "AI Tutor" },
+  { key: "text_review", label: "Text Reviewer" },
+];
+
 export default function AdminLabForm({ mode = "create" }) {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -26,6 +35,7 @@ export default function AdminLabForm({ mode = "create" }) {
   });
   const [labHeadId, setLabHeadId] = useState("");
   const [moderatorIds, setModeratorIds] = useState([]);
+  const [enabledAiTools, setEnabledAiTools] = useState([]);
   const [thumbnailFile, setThumbnailFile] = useState(null);
   const [thumbnailPreview, setThumbnailPreview] = useState("");
 
@@ -59,6 +69,7 @@ export default function AdminLabForm({ mode = "create" }) {
               ? lab.moderators.map((m) => m._id || m.userId?._id || "").filter(Boolean)
               : []
           );
+          setEnabledAiTools(Array.isArray(lab.enabledAiTools) ? lab.enabledAiTools : []);
           if (lab.thumbnailUrl) setThumbnailPreview(lab.thumbnailUrl);
         }
       } catch (err) {
@@ -94,6 +105,14 @@ export default function AdminLabForm({ mode = "create" }) {
     );
   }
 
+  function toggleAiTool(toolKey) {
+    setEnabledAiTools((prev) =>
+      prev.includes(toolKey)
+        ? prev.filter((k) => k !== toolKey)
+        : [...prev, toolKey]
+    );
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError("");
@@ -114,6 +133,7 @@ export default function AdminLabForm({ mode = "create" }) {
         currency: form.currency,
         maxMembers: form.maxMembers !== "" ? Number(form.maxMembers) : null,
         isActive: form.isActive,
+        enabledAiTools,
       };
 
       let labId = id;
@@ -379,6 +399,39 @@ export default function AdminLabForm({ mode = "create" }) {
               )}
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
                 Moderators help manage the lab and evaluate student work.
+              </p>
+            </div>
+
+            {/* AI Tools */}
+            <div>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">
+                AI Research Tools
+              </label>
+              <div className="grid gap-2 sm:grid-cols-2 border border-slate-200 dark:border-slate-600 rounded-lg p-3">
+                {AI_TOOLS_LIST.map((tool) => {
+                  const isEnabled = enabledAiTools.includes(tool.key);
+                  return (
+                    <label
+                      key={tool.key}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-lg cursor-pointer text-sm transition
+                        ${isEnabled
+                          ? "bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-700"
+                          : "bg-slate-50 dark:bg-slate-700/50 border border-transparent hover:bg-slate-100 dark:hover:bg-slate-700"
+                        }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isEnabled}
+                        onChange={() => toggleAiTool(tool.key)}
+                        className="w-4 h-4 text-cyan-600 rounded border-slate-300 focus:ring-cyan-500"
+                      />
+                      <span className="text-slate-700 dark:text-slate-300 truncate">{tool.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                Select which AI tools are available to subscribed members of this lab.
               </p>
             </div>
 

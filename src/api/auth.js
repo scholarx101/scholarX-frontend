@@ -24,9 +24,7 @@ export async function login({ email, password }) {
     const token = data.accessToken || data.token || data.access_token;
     if (token) {
       localStorage.setItem("accessToken", token);
-      console.log("✓ Access token stored successfully");
     } else {
-      console.log("⚠ No access token in login response. Backend may be using httpOnly cookies.");
     }
   } catch (err) {
     console.error("Error storing login data:", err);
@@ -56,9 +54,7 @@ export async function googleLogin({ idToken, returnTo } = {}) {
     const token = data.accessToken || data.token || data.access_token;
     if (token) {
       localStorage.setItem("accessToken", token);
-      console.log("✓ Access token stored successfully");
     } else {
-      console.log("⚠ No access token in Google login response. Backend may be using httpOnly cookies.");
     }
   } catch (err) {
     console.error("Error storing Google login data:", err);
@@ -76,9 +72,7 @@ export async function googleRegister({ idToken, returnTo } = {}) {
     const token = data.accessToken || data.token || data.access_token;
     if (token) {
       localStorage.setItem("accessToken", token);
-      console.log("✓ Access token stored successfully");
     } else {
-      console.log("⚠ No access token in Google register response. Backend may be using httpOnly cookies.");
     }
   } catch (err) {
     console.error("Error storing Google register data:", err);

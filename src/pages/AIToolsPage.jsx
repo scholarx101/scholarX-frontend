@@ -95,10 +95,11 @@ export default function AIToolsPage() {
 
   function handleUseTool(tool) {
     if (!user) {
-      navigate("/login", { state: { from: tool.path } });
+      navigate("/login", { state: { from: "/student/labs" } });
       return;
     }
-    navigate(tool.path);
+    // Tools are accessed through lab subscriptions
+    navigate("/student/labs");
   }
 
   return (
@@ -134,8 +135,13 @@ export default function AIToolsPage() {
 
           <p className="text-lg sm:text-xl text-slate-400 leading-relaxed max-w-2xl mx-auto mb-10">
             Supercharge your research with intelligent tools for chat, document analysis, code explanation, 
-            tutoring, and more. Built for students and researchers.
+            tutoring, and more. Built for lab subscribers.
           </p>
+
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-sm text-slate-400 mb-6">
+            <svg className="w-4 h-4 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z" /></svg>
+            Tools are enabled per lab by admins. Subscribe to a lab to access its tools.
+          </div>
 
           {!user && (
             <p className="text-sm text-slate-500">
@@ -202,7 +208,7 @@ export default function AIToolsPage() {
                            text-white rounded-xl bg-gradient-to-r ${tool.gradient}
                            hover:opacity-90 shadow-sm transition-all duration-200`}
               >
-                {user ? "Try Now" : "Sign in to Use"}
+                {user ? "Access via My Labs" : "Sign in to Use"}
                 <svg className="w-4 h-4 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
                 </svg>

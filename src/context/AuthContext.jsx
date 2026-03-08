@@ -65,7 +65,6 @@ export function AuthProvider({ children }) {
 
   async function login(credentials) {
     const data = await apiLogin(credentials);
-    console.log("AuthContext login data:", data);
     const user = data?.user || data;
     setUser(user);
     try {

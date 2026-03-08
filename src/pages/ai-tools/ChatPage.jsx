@@ -1,12 +1,14 @@
 // src/pages/ai-tools/ChatPage.jsx
 import { useState, useRef, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AIToolLayout from "../../components/AIToolLayout";
 import { sendChatMessage, getConversationById } from "../../api/aiTools";
 
 export default function ChatPage() {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const initialConvId = searchParams.get("conversationId");
+  const labId = searchParams.get("labId");
 
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
@@ -51,7 +53,7 @@ export default function ChatPage() {
     setLoading(true);
 
     try {
-      const data = await sendChatMessage({ message: text, conversationId });
+      const data = await sendChatMessage({ message: text, conversationId, labId });
       if (data?.conversationId) setConversationId(data.conversationId);
       setMessages((prev) => [...prev, { role: "assistant", content: data.response || data.message || "" }]);
     } catch (err) {
@@ -61,6 +63,20 @@ export default function ChatPage() {
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!labId) {
+    return (
+      <AIToolLayout title="AI Chat Assistant" subtitle="Have an interactive conversation with AI" gradient="from-blue-500 to-cyan-500">
+        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
+            <svg className="w-6 h-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">AI tools must be accessed through a subscribed lab.</p>
+          <button onClick={() => navigate("/student/labs")} className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition">Go to My Labs</button>
+        </div>
+      </AIToolLayout>
+    );
   }
 
   return (

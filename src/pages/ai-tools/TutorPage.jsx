@@ -1,5 +1,6 @@
 // src/pages/ai-tools/TutorPage.jsx
 import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AIToolLayout from "../../components/AIToolLayout";
 import { getTutoring } from "../../api/aiTools";
 
@@ -10,6 +11,9 @@ const LEVELS = [
 ];
 
 export default function TutorPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const labId = searchParams.get("labId");
   const [concept, setConcept] = useState("");
   const [level, setLevel] = useState("beginner");
   const [result, setResult] = useState("");
@@ -25,13 +29,27 @@ export default function TutorPage() {
     setLoading(true);
 
     try {
-      const data = await getTutoring({ concept: concept.trim(), level });
+      const data = await getTutoring({ concept: concept.trim(), level, labId });
       setResult(data.response || data.explanation || "");
     } catch (err) {
       setError(err.message || "Tutoring request failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!labId) {
+    return (
+      <AIToolLayout title="AI Tutor" subtitle="Personalized tutoring at your level" gradient="from-rose-500 to-pink-500">
+        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-rose-100 dark:bg-rose-900/30 flex items-center justify-center">
+            <svg className="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">AI tools must be accessed through a subscribed lab.</p>
+          <button onClick={() => navigate("/student/labs")} className="px-5 py-2 rounded-lg bg-rose-600 text-white text-sm font-medium hover:bg-rose-700 transition">Go to My Labs</button>
+        </div>
+      </AIToolLayout>
+    );
   }
 
   return (

@@ -1,5 +1,6 @@
 // src/pages/ai-tools/AnalyzeDocumentPage.jsx
 import { useState } from "react";
+import { useSearchParams, useNavigate } from "react-router-dom";
 import AIToolLayout from "../../components/AIToolLayout";
 import { analyzeDocument } from "../../api/aiTools";
 
@@ -11,6 +12,9 @@ const ANALYSIS_TYPES = [
 ];
 
 export default function AnalyzeDocumentPage() {
+  const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
+  const labId = searchParams.get("labId");
   const [documentText, setDocumentText] = useState("");
   const [analysisType, setAnalysisType] = useState("summary");
   const [result, setResult] = useState("");
@@ -26,13 +30,27 @@ export default function AnalyzeDocumentPage() {
     setLoading(true);
 
     try {
-      const data = await analyzeDocument({ documentText: documentText.trim(), analysisType });
+      const data = await analyzeDocument({ documentText: documentText.trim(), analysisType, labId });
       setResult(data.response || data.analysis || "");
     } catch (err) {
       setError(err.message || "Analysis failed");
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!labId) {
+    return (
+      <AIToolLayout title="Document Analyzer" subtitle="AI-powered document analysis" gradient="from-emerald-500 to-teal-500">
+        <div className="flex flex-col items-center justify-center h-64 gap-4 text-center">
+          <div className="w-12 h-12 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center">
+            <svg className="w-6 h-6 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
+          </div>
+          <p className="text-slate-600 dark:text-slate-400 text-sm">AI tools must be accessed through a subscribed lab.</p>
+          <button onClick={() => navigate("/student/labs")} className="px-5 py-2 rounded-lg bg-emerald-600 text-white text-sm font-medium hover:bg-emerald-700 transition">Go to My Labs</button>
+        </div>
+      </AIToolLayout>
+    );
   }
 
   return (
