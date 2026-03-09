@@ -1,8 +1,8 @@
 // src/pages/ai-tools/ExplainCodePage.jsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import AIToolLayout from "../../components/AIToolLayout";
-import { explainCode } from "../../api/aiTools";
+import { explainCode, getConversations, getConversationById, deleteConversation } from "../../api/aiTools";
 
 const LANGUAGES = [
   "JavaScript", "Python", "Java", "C++", "C#", "TypeScript",
@@ -18,6 +18,61 @@ export default function ExplainCodePage() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [conversations, setConversations] = useState([]);
+  const [convsLoading, setConvsLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [selectedConvId, setSelectedConvId] = useState(null);
+
+  useEffect(() => {
+    if (labId) loadConversations();
+  }, [labId]);
+
+  async function loadConversations() {
+    try {
+      setConvsLoading(true);
+      const convs = await getConversations({ toolType: "code_explanation", labId });
+      setConversations(Array.isArray(convs) ? convs : []);
+    } catch (err) {
+      console.error("Failed to load conversations:", err);
+    } finally {
+      setConvsLoading(false);
+    }
+  }
+
+  async function loadConversation(id) {
+    try {
+      setLoading(true);
+      const data = await getConversationById(id);
+      if (data) {
+        setSelectedConvId(data._id);
+        const lastMessage = data.messages?.[0];
+        if (lastMessage) {
+          setCode(lastMessage.content || "");
+          setResult(data.messages?.[1]?.content || "");
+        }
+      }
+    } catch (err) {
+      alert("Failed to load previous explanation");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleDeleteConv(id, e) {
+    e.stopPropagation();
+    if (!window.confirm("Delete this explanation?")) return;
+    try {
+      await deleteConversation(id);
+      setConversations((prev) => prev.filter((c) => c._id !== id));
+      if (selectedConvId === id) {
+        setSelectedConvId(null);
+        setCode("");
+        setResult("");
+      }
+    } catch (err) {
+      alert(err.message || "Failed to delete");
+    }
+  }
 
   async function handleExplain(e) {
     e.preventDefault();
@@ -25,11 +80,13 @@ export default function ExplainCodePage() {
 
     setError("");
     setResult("");
+    setSelectedConvId(null);
     setLoading(true);
 
     try {
       const data = await explainCode({ code: code.trim(), language, labId });
       setResult(data.response || data.explanation || "");
+      await loadConversations();
     } catch (err) {
       setError(err.message || "Explanation failed");
     } finally {
@@ -53,64 +110,133 @@ export default function ExplainCodePage() {
 
   return (
     <AIToolLayout title="Code Explainer" subtitle="Get clear explanations for any code" gradient="from-violet-500 to-purple-500">
-      <div className="grid lg:grid-cols-2 gap-6 h-[calc(100vh-10rem)]">
-        {/* Input */}
-        <form onSubmit={handleExplain} className="flex flex-col gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Language</label>
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 
-                         bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm
-                         focus:outline-none focus:ring-2 focus:ring-violet-500/40"
-            >
-              {LANGUAGES.map((l) => (
-                <option key={l} value={l}>{l}</option>
-              ))}
-            </select>
-          </div>
+      <div className="flex h-[calc(100vh-10rem)] gap-4">
+        {/* Sidebar */}
+        <div className={`${sidebarOpen ? "w-72" : "w-0"} flex-shrink-0 transition-all duration-200 flex flex-col border-r border-slate-200 dark:border-slate-800 overflow-hidden`}>
+          {sidebarOpen && (
+            <div className="flex flex-col h-full">
+              <div className="p-4 border-b border-slate-200 dark:border-slate-800">
+                <button
+                  onClick={() => {
+                    setCode("");
+                    setResult("");
+                    setSelectedConvId(null);
+                  }}
+                  className="w-full px-4 py-2.5 rounded-lg bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-medium hover:from-violet-500 hover:to-purple-500 transition"
+                >
+                  + New Explanation
+                </button>
+              </div>
+              <div className="flex-1 overflow-y-auto p-3 space-y-2">
+                {convsLoading ? (
+                  <div className="flex items-center justify-center py-4">
+                    <div className="animate-spin rounded-full h-4 w-4 border-2 border-violet-500 border-t-transparent" />
+                  </div>
+                ) : conversations.length === 0 ? (
+                  <p className="text-xs text-slate-400 text-center">No explanations yet</p>
+                ) : (
+                  conversations.map((conv) => (
+                    <div
+                      key={conv._id}
+                      onClick={() => loadConversation(conv._id)}
+                      className={`p-3 rounded-lg cursor-pointer transition-all group text-left ${
+                        selectedConvId === conv._id
+                          ? "bg-violet-100 dark:bg-violet-900/30 border border-violet-300 dark:border-violet-700"
+                          : "bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700"
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-medium text-slate-900 dark:text-white truncate">{conv.title || "Code explanation"}</p>
+                          <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">{new Date(conv.updatedAt || conv.createdAt).toLocaleDateString()}</p>
+                        </div>
+                        <button
+                          onClick={(e) => handleDeleteConv(conv._id, e)}
+                          className="opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-[10px] text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/30 transition"
+                        >
+                          ✕
+                        </button>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+        </div>
 
-          <div className="flex-1 flex flex-col">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Code Snippet</label>
-            <textarea
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              placeholder="Paste your code here..."
-              className="flex-1 min-h-[200px] px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 
-                         bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
-                         placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 
-                         text-sm font-mono resize-none"
-            />
-          </div>
-
+        {/* Main content */}
+        <div className="flex-1 min-w-0 flex flex-col">
           <button
-            type="submit"
-            disabled={loading || !code.trim()}
-            className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold
-                       hover:from-violet-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed
-                       transition-all duration-200 shadow-sm"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="absolute top-4 left-4 p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition"
+            title={sidebarOpen ? "Hide sidebar" : "Show sidebar"}
           >
-            {loading ? "Explaining..." : "Explain Code"}
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d={sidebarOpen ? "M15 19l-7-7 7-7" : "M9 5l7 7-7 7"} />
+            </svg>
           </button>
-        </form>
 
-        {/* Result */}
-        <div className="flex flex-col">
-          <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Explanation</h3>
-          <div className="flex-1 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
-            {error && (
-              <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg border border-red-200 dark:border-red-800/30">
-                {error}
+          <div className="grid lg:grid-cols-2 gap-6 flex-1 overflow-hidden">
+            {/* Input */}
+            <form onSubmit={handleExplain} className="flex flex-col gap-4 overflow-auto pb-4">
+              <div>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Language</label>
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl border border-slate-300 dark:border-slate-600 
+                             bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100 text-sm
+                             focus:outline-none focus:ring-2 focus:ring-violet-500/40"
+                >
+                  {LANGUAGES.map((l) => (
+                    <option key={l} value={l}>{l}</option>
+                  ))}
+                </select>
               </div>
-            )}
-            {result ? (
-              <div className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{result}</div>
-            ) : !error && (
-              <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
-                {loading ? "Analyzing your code..." : "Explanation will appear here"}
+
+              <div className="flex-1 flex flex-col">
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Code Snippet</label>
+                <textarea
+                  value={code}
+                  onChange={(e) => setCode(e.target.value)}
+                  placeholder="Paste your code here..."
+                  className="flex-1 min-h-[200px] px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-600 
+                             bg-white dark:bg-slate-800 text-slate-900 dark:text-slate-100
+                             placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-violet-500/40 
+                             text-sm font-mono resize-none"
+                />
               </div>
-            )}
+
+              <button
+                type="submit"
+                disabled={loading || !code.trim()}
+                className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-violet-600 to-purple-600 text-white text-sm font-semibold
+                           hover:from-violet-500 hover:to-purple-500 disabled:opacity-50 disabled:cursor-not-allowed
+                           transition-all duration-200 shadow-sm"
+              >
+                {loading ? "Explaining..." : "Explain Code"}
+              </button>
+            </form>
+
+            {/* Result */}
+            <div className="flex flex-col">
+              <h3 className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Explanation</h3>
+              <div className="flex-1 overflow-y-auto rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4">
+                {error && (
+                  <div className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 px-4 py-2 rounded-lg border border-red-200 dark:border-red-800/30">
+                    {error}
+                  </div>
+                )}
+                {result ? (
+                  <div className="text-sm text-slate-800 dark:text-slate-200 leading-relaxed whitespace-pre-wrap">{result}</div>
+                ) : !error && (
+                  <div className="flex items-center justify-center h-full text-slate-400 dark:text-slate-500 text-sm">
+                    {loading ? "Analyzing your code..." : "Explanation will appear here"}
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -4,7 +4,9 @@ import { apiClient } from "./client";
 // ============ LAB TOOLS (PUBLIC) ============
 
 export async function getLabTools(labId) {
-  return apiClient.get(`/api/ai-tools/labs/${labId}/tools`);
+  const data = await apiClient.get(`/api/ai-tools/labs/${labId}/tools`);
+  // Backend returns { labId, labName, tools: [...] }
+  return Array.isArray(data?.tools) ? data.tools : [];
 }
 
 // ============ AI TOOL ENDPOINTS ============

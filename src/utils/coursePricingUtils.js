@@ -16,18 +16,28 @@ export const getCoursePricing = (course) => ({
 });
 
 /**
- * Resolve asset URL
+ * Resolve asset URL.
+ * Handles:
+ *  - Already-absolute URLs (http/https) → returned as-is
+ *  - Windows absolute paths (e.g. D:/scholarX-backend/uploads/file.jpg)
+ *    → extract everything from "uploads/" onward and prefix with API base
+ *  - Relative paths (e.g. uploads/file.jpg or /uploads/file.jpg)
+ *    → prefix with API base
  */
 export const resolveAssetUrl = (url) => {
     if (typeof url !== "string" || !url) return "";
-    // if it's already absolute, just return it
+    // Already a valid http/https URL
     if (/^https?:\/\//i.test(url)) return url;
-    // otherwise prefix with API base or origin so that relative paths resolve to a usable host
-    const base = import.meta.env.VITE_API_BASE_URL || window.location.origin;
-    // ensure no double slashes when concatenating
-    const prefix = base.replace(/\/+$/, "");
+    const base = (import.meta.env.VITE_API_BASE_URL || window.location.origin).replace(/\/+$/, "");
+    // Windows absolute path or any path containing a drive letter (e.g. C:\ or D:/)
+    // Extract from "uploads/" onward so we end up with /uploads/<filename>
+    const uploadsMatch = url.replace(/\\/g, "/").match(/uploads\/.+/);
+    if (uploadsMatch) {
+        return `${base}/${uploadsMatch[0]}`;
+    }
+    // Normal relative path
     const path = url.startsWith("/") ? url : `/${url}`;
-    return prefix + path;
+    return base + path;
 };
 
 /**

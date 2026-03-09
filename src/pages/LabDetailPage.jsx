@@ -29,6 +29,7 @@ export default function LabDetailPage() {
   const [mySubscription, setMySubscription] = useState(null);
   const [successMsg, setSuccessMsg] = useState("");
   const [labTools, setLabTools] = useState([]);
+  const [thumbError, setThumbError] = useState(false);
 
   useEffect(() => {
     async function load() {
@@ -123,6 +124,14 @@ export default function LabDetailPage() {
   const moderators = Array.isArray(lab.moderators) ? lab.moderators : [];
   const subscriptionStatus = mySubscription?.status;
 
+  // Build merged tool list — always show all 6 tools
+  const toolsMap = labTools.reduce((acc, t) => { acc[t.key] = t.enabled; return acc; }, {});
+  const allTools = Object.entries(TOOL_PATH_MAP).map(([key, meta]) => ({
+    key,
+    enabled: toolsMap[key] ?? false,
+    ...meta,
+  }));
+
   return (
     <div className="min-h-screen bg-indigo-50 dark:bg-slate-950">
       {/* Hero */}
@@ -142,11 +151,12 @@ export default function LabDetailPage() {
             {/* Thumbnail */}
             <div className="md:col-span-2">
               <div className="rounded-2xl overflow-hidden shadow-2xl shadow-black/30 aspect-video bg-slate-800">
-                {(lab.thumbnail || lab.thumbnailUrl) ? (
+                {(lab.thumbnail || lab.thumbnailUrl) && !thumbError ? (
                   <img
                     src={resolveAssetUrl(lab.thumbnail || lab.thumbnailUrl)}
                     alt={lab.name}
                     className="w-full h-full object-cover"
+                    onError={() => setThumbError(true)}
                   />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-violet-600/20 to-purple-600/20 flex items-center justify-center">
@@ -292,10 +302,10 @@ export default function LabDetailPage() {
         </div>
       )}
 
-      {/* AI Research Tools */}
-      {labTools.length > 0 && (
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 border-t border-slate-200 dark:border-slate-800">
-          <div className="mb-6">
+      {/* AI Research Tools — always visible */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-10 border-t border-slate-200 dark:border-slate-800">
+        <div className="mb-6 flex items-start justify-between gap-4 flex-wrap">
+          <div>
             <span className="text-xs font-semibold tracking-widest uppercase text-cyan-600 dark:text-cyan-400">Lab Feature</span>
             <h3 className="text-2xl font-bold text-slate-900 dark:text-white mt-1">AI Research Tools</h3>
             <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -304,65 +314,65 @@ export default function LabDetailPage() {
                 : "Subscribe to this lab to access the AI tools below."}
             </p>
           </div>
+          {(subscriptionStatus === "active" || user?.role === "admin") && (
+            <button
+              onClick={() => navigate(`/labs/${id}/ai-tools`)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-sm font-medium transition shadow-lg shadow-cyan-500/20"
+            >
+              Open AI Tools Hub
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+              </svg>
+            </button>
+          )}
+        </div>
 
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {labTools.map((tool) => {
-              const meta = TOOL_PATH_MAP[tool.key] || {};
-              const canUse =
-                tool.enabled &&
-                (subscriptionStatus === "active" || user?.role === "admin");
-              const isDisabled = !tool.enabled;
-              const needsSub = tool.enabled && subscriptionStatus !== "active" && user?.role !== "admin";
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {allTools.map((tool) => {
+            const canUse = tool.enabled && (subscriptionStatus === "active" || user?.role === "admin");
+            const needsSub = tool.enabled && subscriptionStatus !== "active" && user?.role !== "admin";
 
-              return (
-                <div
-                  key={tool.key}
-                  onClick={() => {
-                    if (canUse) navigate(`${meta.path}?labId=${id}`);
-                  }}
-                  className={`relative rounded-2xl border p-5 flex items-start gap-4 transition-all duration-200
-                    ${canUse
-                      ? "bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
-                      : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 cursor-default opacity-70"
-                    }`}
-                >
-                  {/* Icon */}
-                  <span className="text-2xl shrink-0 mt-0.5">{meta.icon || "🔧"}</span>
-
-                  {/* Info */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
-                        {meta.label || tool.key}
+            return (
+              <div
+                key={tool.key}
+                onClick={() => { if (canUse) navigate(`${tool.path}?labId=${id}`); }}
+                className={`relative rounded-2xl border p-5 flex items-start gap-4 transition-all duration-200
+                  ${canUse
+                    ? "bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:shadow-lg hover:-translate-y-0.5 cursor-pointer"
+                    : "bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-slate-800 cursor-default opacity-70"
+                  }`}
+              >
+                <span className="text-2xl shrink-0 mt-0.5">{tool.icon || "🔧"}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+                      {tool.label || tool.key}
+                    </span>
+                    {!tool.enabled && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
+                        Not enabled
                       </span>
-                      {isDisabled && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400">
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
-                          Not enabled
-                        </span>
-                      )}
-                      {needsSub && !isDisabled && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
-                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z" /></svg>
-                          Subscribe to use
-                        </span>
-                      )}
-                      {canUse && (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
-                          Available
-                        </span>
-                      )}
-                    </div>
+                    )}
+                    {needsSub && (
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-violet-100 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400">
+                        🔒 Subscribe
+                      </span>
+                    )}
                     {canUse && (
-                      <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1 font-medium">Click to open →</p>
+                      <span className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400">
+                        Available
+                      </span>
                     )}
                   </div>
+                  {canUse && (
+                    <p className="text-xs text-cyan-600 dark:text-cyan-400 mt-1 font-medium">Click to open →</p>
+                  )}
                 </div>
-              );
-            })}
-          </div>
+              </div>
+            );
+          })}
         </div>
-      )}
+      </div>
     </div>
   );
 }

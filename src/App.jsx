@@ -45,6 +45,7 @@ const GenerateIdeasPage = lazy(() => import("./pages/ai-tools/GenerateIdeasPage"
 const TutorPage = lazy(() => import("./pages/ai-tools/TutorPage"));
 const ReviewTextPage = lazy(() => import("./pages/ai-tools/ReviewTextPage"));
 const ConversationsPage = lazy(() => import("./pages/ai-tools/ConversationsPage"));
+const LabAIToolsPage = lazy(() => import("./pages/LabAIToolsPage"));
 
 export default function App() {
     const [infoPanel, setInfoPanel] = useState(null);
@@ -132,6 +133,9 @@ export default function App() {
 
                 {/* public lab details */}
                 <Route path="/labs/:id" element={<LabDetailPage />} />
+
+                {/* per-lab AI tools hub (protected) */}
+                <Route path="/labs/:labId/ai-tools" element={<ProtectedRoute><LabAIToolsPage /></ProtectedRoute>} />
 
                 {/* public AI tools showcase */}
                 <Route path="/ai-tools" element={<AIToolsPage />} />

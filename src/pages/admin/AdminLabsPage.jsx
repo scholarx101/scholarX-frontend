@@ -138,6 +138,12 @@ export default function AdminLabsPage() {
                 {/* Actions */}
                 <div className="flex gap-2 flex-shrink-0">
                   <button
+                    onClick={() => navigate(`/labs/${lab._id}/ai-tools`)}
+                    className="px-3 py-1.5 bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-700 hover:to-indigo-700 text-white text-sm rounded font-medium transition"
+                  >
+                    AI Tools
+                  </button>
+                  <button
                     onClick={() => navigate(`/admin/labs/${lab._id}/edit`)}
                     className="px-3 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm rounded font-medium transition"
                   >
