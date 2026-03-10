@@ -11,6 +11,7 @@ const ANALYSIS_TYPES = [
   { value: "methodology", label: "Methodology Review" },
 ];
 
+
 export default function AnalyzeDocumentPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
